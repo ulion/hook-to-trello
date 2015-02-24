@@ -47,12 +47,14 @@ class BitBucketTrelloClient
     next err, body
 
   make-message: (commit) ->
-    "#{commit.author}: #{commit.message}\n\n#{@payload.canon_url + @payload.repository.absolute_url}commits/#{commit.raw_node}"
+    "#{commit.author}: #{commit.message}\n\nbranch: #{commit.branch}/[#{commit.node}](#{@payload.canon_url + @payload.repository.absolute_url}commits/#{commit.raw_node})\n\nFiles:\n\n#{[f.file for f in commit.files]}"
 
   handle-commit: (commit={}, next) ->
     commit = {} <<< default-commit <<< commit <<< help.parse @board.lists, commit.message
     err <~ @set-action-author commit
     return next err if err?
+    if !commit.card && conf.board_default_card && conf.board_default_card[@payload.board_id]
+      commit.card = conf.board_default_card[@payload.board_id]
     return next! if !commit.card?
 
     err, card <~ @get-card commit.card
@@ -128,6 +130,7 @@ module.exports = (req,res) ->
   catch
     msg = req.body.payload ? req.body
 
+  msg.board_id = req.params.id
   console.log "[__POST__]".green, "by #{msg.user || msg.pusher?.name}".grey
 
   client = switch req.params.provider

@@ -24,17 +24,17 @@ exports.parse = (list, msg) ->
   #   options: optimist f .argv
 
   commit = {}
-  hash = msg.match /#\d+/
+  hash = msg.match /tr#\d+/
   return commit if !hash?
 
   hash .= pop!
-  commit.card = +hash.slice(1)
-  prefix = ("" + msg).slice(0, msg.search(/#\d+/)).trim!to-lower-case!
-
-  for item in list
-    if prefix.match(new RegExp(item.name.to-lower-case! + "$", \i))?
-      commit.list = item.id
-      return commit
+  commit.card = +hash.slice(3)
+#  prefix = ("" + msg).slice(0, msg.search(/#\d+/)).trim!to-lower-case!
+#
+#  for item in list
+#    if prefix.match(new RegExp(item.name.to-lower-case! + "$", \i))?
+#      commit.list = item.id
+#      return commit
 
   return commit
 
