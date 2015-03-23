@@ -56,6 +56,7 @@ class BitBucketTrelloClient
     if !commit.card && conf.board_default_card && conf.board_default_card[@payload.board_id]
       commit.card = conf.board_default_card[@payload.board_id]
     return next! if !commit.card?
+    console.log "[CARD]".green, commit.card, "[#{commit.raw_node}][#{commit.author}]: #{commit.message}"
 
     err, card <~ @get-card commit.card
     return console.log ("" + err).red if err? && !(err == 1)
