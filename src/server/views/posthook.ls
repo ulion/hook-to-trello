@@ -50,13 +50,14 @@ class BitBucketTrelloClient
     "#{commit.author}: #{commit.message}\n\nbranch: #{commit.branch}/[#{commit.node}](#{@payload.canon_url + @payload.repository.absolute_url}commits/#{commit.raw_node})\n\nFiles:\n\n#{[f.file for f in commit.files]}"
 
   handle-commit: (commit={}, next) ->
+    console.log "handle-commit", commit.raw_node
     commit = {} <<< default-commit <<< commit <<< help.parse @board.lists, commit.message
     err <~ @set-action-author commit
     return next err if err?
     if !commit.card && conf.board_default_card && conf.board_default_card[@payload.board_id]
       commit.card = conf.board_default_card[@payload.board_id]
     return next! if !commit.card?
-    console.log "[CARD]".green, commit.card, "[#{commit.raw_node}][#{commit.author}]:", commit.message.trim()
+    console.log "[CARD]".green, commit.card, "[#{commit.raw_node}][#{commit.author}]:", commit.message.trim!
 
     err, card <~ @get-card commit.card
     return console.log ("" + err).red if err? && !(err == 1)
@@ -145,8 +146,13 @@ module.exports = (req,res) ->
   return res.json 404, error: "not found" if !client?
 
   acc = []
-  msg.commits?.for-each? (i) -> acc.push -> client.handle-commit i, it
-  async.series acc, (err)-> console.log err.toString!.red if err?
+  msg.commits?.for-each? (i) -> acc.push (it)-> client.handle-commit i, (err)->
+    console.log "after handle-commit", err
+    it err
+  async.series acc, (err)->
+    console.log err.toString!.red if err?
+    console.log "after handle-commits finished"
+  console.log "handle-commits inited"
 
   res.json do
     req-body: body
