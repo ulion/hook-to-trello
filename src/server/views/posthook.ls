@@ -56,7 +56,7 @@ class BitBucketTrelloClient
     if !commit.card && conf.board_default_card && conf.board_default_card[@payload.board_id]
       commit.card = conf.board_default_card[@payload.board_id]
     return next! if !commit.card?
-    console.log "[CARD]".green, commit.card, "[#{commit.raw_node}][#{commit.author}]: #{commit.message}"
+    console.log "[CARD]".green, commit.card, "[#{commit.raw_node}][#{commit.author}]:", commit.message.trim()
 
     err, card <~ @get-card commit.card
     return console.log ("" + err).red if err? && !(err == 1)
@@ -74,7 +74,10 @@ class BitBucketTrelloClient
         err <~ @update-card card.id, {idList: commit.list}
         cbk err
     ]
-    return console.log ("" + err).red if err? && !(err == 1)
+    if err? && !(err == 1)
+      console.log ("" + err).red
+      return next err
+    return next!
 
   set-action-author: (commit, next) ->
     # cache for current http POST request
