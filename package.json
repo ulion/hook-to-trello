@@ -6,7 +6,7 @@
     "LiveScript": "*",
     "coffee-script": "*",
     "express": "3.x",
-    "eco": "*",
+    "eco": "sstephenson/eco",
     "colors": "*",
     "async": "*",
     "prelude-ls": "*",
