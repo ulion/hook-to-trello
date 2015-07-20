@@ -116,7 +116,15 @@ class GitHubTrelloClient extends BitBucketTrelloClient
     commit.committer?.name
 
   make-message: (commit) ->
-    "#{commit.committer.name}: #{commit.message}\n\n#{commit.url}"
+    message = "#{commit.author.name}: #{commit.message}\n\nbranch: #{@payload.ref.split(/\//g).pop()}/#{commit.url}\n"
+    if commit.added.length > 0
+      message += "\nAdded: #{commit.added}"
+    if commit.removed.length > 0
+      message += "\nRemoved: #{commit.removed}"
+    if commit.modified.length > 0
+      message += "\nModified: #{commit.modified}"
+    return message
+
 
 module.exports = (req,res) ->
   req.params.id = req.params.provider unless req.params.id?
