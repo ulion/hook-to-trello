@@ -51,7 +51,7 @@ class BitBucketTrelloClient
 
   handle-commit: (commit={}, next) ->
     console.log "handle-commit", commit.raw_node
-    commit = {} <<< default-commit <<< commit <<< help.parse @board.lists, commit.message
+    commit = {} <<< default-commit <<< commit <<< help.parse null, commit.message
     err <~ @set-action-author commit
     return next err if err?
     if !commit.card && conf.board_default_card && conf.board_default_card[@payload.board_id]
